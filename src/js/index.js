@@ -3,7 +3,11 @@ import Search from './model/search';
 import { elements, renderLoader, clearLoader} from './viev/base';
 import * as searchView from './viev/searchView';
 import Recipe from './model/recipe';
-import {clearRecipe, rendRec} from './viev/recipeView';
+import list from './model/list';
+import * as listView from './viev/listView';
+import Like from './model/like';
+import {clearRecipe, rendRec, highligthSelectedRecipe} from './viev/recipeView';
+import * as likeView from './viev/likeView';
 
 /**
  * Web app төлөв
@@ -15,6 +19,10 @@ import {clearRecipe, rendRec} from './viev/recipeView';
 
 const state = {};
 
+
+/**
+ * Хайлтын контроллер
+ */
 const controlSearch = async () =>{
     // 1) Вэбээс хайлтын түлхүүр үгийг гаргаж авна.
     const query = searchView.getInput();
@@ -48,16 +56,23 @@ elements.pageButtons.addEventListener("click", e => {
     }
 })
 
+
+
+/**
+ * Жорын контроллер
+ */
 const controleRecipe = async () => {
     // 1) URL - аас ID - г салгаж авна
      const id = window.location.hash.replace("#", "");
 
-    // 2) Жорын моделыг үүсгэж өгнө
+   if(id){
+     // 2) Жорын моделыг үүсгэж өгнө
      state.recipe = new Recipe(id);
 
     // 3) UI дэлгэцийг бэлтгэж өгнө
      clearRecipe();
      renderLoader(elements.recipeDiv);
+     highligthSelectedRecipe(id);
 
     // 4) Жороо татаж авна
     await state.recipe.getRecipe();
@@ -69,6 +84,70 @@ const controleRecipe = async () => {
 
     // 6) Жороо дэлгэцэнд үзүүлнэ
      rendRec(state.recipe);
+   }
 }
-window.addEventListener("hashchange", controleRecipe);
-window.addEventListener("load", controleRecipe);
+["hashchange", "load"].forEach(e => window.addEventListener(e , controleRecipe));
+
+
+/**
+ * Найрлаганы контроллер
+ */
+const  controlList = () => {
+    // 1) Найрлаганы моделыг.
+    state.list = new list();
+
+    // найрлагыг цэвэрлэх 
+    listView.clearItem();
+
+    // 2) Бүх найрлагаа найрлаганы модел руу хиийнэ.
+    state.recipe.ingredients.forEach( n => {
+        // Тухайн найралгыг модел руу нэмнэ.
+        const item = state.list.addItem(n);
+
+        // Найрлагыг дэлгэцэнд гаргана
+        listView.renderItem(item);
+    
+    });
+};
+
+/**
+ * Controle like
+ */
+const controlLike = () =>{
+    // 1) Like aa hadgalah Modeliig uusgene;
+    if(!state.like)state.like = new Like();
+
+    // 2) Odoo haragdaj baigaa joriin modeliig olj awna;
+    const currentRecipeId = state.recipe.id
+    // 3) Ene Likelagdsan esehiig shalgana
+    if(state.like.isliked(currentRecipeId)){
+        //  likelsan bol deer n darahad like iig n boliulna
+        state.like.deleteLike(currentRecipeId);
+        likeView.toggleLikeBtn(false)
+    }else{
+       //  Likelaagui bol likelna
+       state.like.addLike(currentRecipeId, state.recipe.title, state.recipe.publisher, state.recipe.img_url);
+       likeView.toggleLikeBtn(true)
+
+    }
+
+}
+
+elements.recipeDiv.addEventListener("click", e => {
+
+    if(e.target.matches(".recipe__btn, .recipe__btn *")){
+        controlList();
+
+    } else if ( e.target.matches(".recipe__love, .recipe__love *") ){
+        controlLike();
+    }
+});
+
+elements.shoppingList.addEventListener("click", e => {
+        const id = e.target.closest(".shopping__item").dataset.itemid;
+        // modeloos ustgah
+    state.list.deleteItem(id);
+
+    // Delgetsnees ustgana;
+    listView.deleteItem(id);
+})
