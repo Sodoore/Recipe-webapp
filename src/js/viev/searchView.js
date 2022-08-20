@@ -9,10 +9,9 @@ import { elements } from "./base"
 // title: "Best Pizza Dough Ever"
 // private functions and datas
 const renderRecipe = recipe =>{
-    console.log(recipe);
     const markup = `
         <li>
-            <a class="results__link" href="${recipe.recipe_id}">
+            <a class="results__link" href="#${recipe.recipe_id}">
                 <figure class="results__fig">
                     <img src="${recipe.image_url}" alt="Test">
                 </figure>
@@ -30,6 +29,47 @@ const renderRecipe = recipe =>{
 export const clearSearch = () =>{
     elements.searchInput.value = ``;
     elements.searchResultList.innerHTML = ``;
+    elements.pageButtons.innerHTML = ``;
+
 }
 export const getInput = () => elements.searchInput.value;
-export const renderRecipes = recipes => recipes.forEach(el => renderRecipe(el));
+export const renderRecipes = (recipes, currentPage = 1, resPerPage = 8) =>{ 
+    // Хайлтын үр дүнг хуудаслаж үзүүлэх
+    const start = (currentPage - 1) * resPerPage;
+    const end = currentPage * resPerPage;
+
+    recipes.slice(start, end).forEach(el => renderRecipe(el))
+
+
+    // Хуудаслалтын точнуудыг гаргаж ирэх
+    const totalPages = Math.ceil(recipes.length / resPerPage);
+    renderButtons(currentPage, totalPages);
+};
+
+// type ====> "next" or "prev"
+const createButton = (page, type, direction) => 
+` <button class="btn-inline results__btn--${type}" data-goto=${page}>
+<svg class="search__icon">
+    <use href="img/icons.svg#icon-triangle-${direction}"></use>
+</svg>
+<span>Хуудас ${page}</span>
+</button>`
+
+
+const renderButtons = (currentPage, totalPages) => {
+    let button;
+
+    if( currentPage === 1 && totalPages > 1  ){
+        // Эхний хуудас дээр байна 
+        button = createButton( 2, "next", "right" );
+    }else if(currentPage < totalPages){
+        // Дараагийн хуудсан дээр байна
+        button = createButton(currentPage - 1, "prev", "left");
+        button += createButton(currentPage + 1, "next", "right");
+    }else if(currentPage === totalPages){
+        // Сүүлийн хуудсанд  байна
+        button = createButton(currentPage - 1, "prev", "left")
+    }
+
+    elements.pageButtons.insertAdjacentHTML("afterbegin", button);
+};
