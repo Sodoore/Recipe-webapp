@@ -16,7 +16,7 @@ const rendNairlaga = (orts) => {
 
 export const highligthSelectedRecipe = id =>{
     Array.from(document.querySelectorAll(".results__link")).forEach(el => el.classList.remove("results__link--active"));
-    const domObj = document.querySelector(`a[href*="${id}"]`)
+    const domObj = document.querySelector(`.results__link[href*="${id}"]`)
     
     if(domObj) domObj.classList.add("results__link--active");
 
@@ -27,7 +27,7 @@ export const clearRecipe = () => {
     elements.recipeDiv.innerHTML = "";
 };
 
-export const rendRec = (recipe) => {
+export const rendRec = (recipe, isliked) => {
     //  delgets deer jriig gargana
     const html = `
         
@@ -68,7 +68,7 @@ export const rendRec = (recipe) => {
     </div>
     <button class="recipe__love">
         <svg class="header__likes">
-            <use href="img/icons.svg#icon-heart-outlined"></use>
+            <use href="img/icons.svg#icon-heart${isliked ? "" : '-outlined'}"></use>
         </svg>
     </button>
 </div>

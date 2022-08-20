@@ -18,6 +18,7 @@ import * as likeView from './viev/likeView';
  */
 
 const state = {};
+likeView.toglleLikeMenu(0);
 
 
 /**
@@ -64,6 +65,7 @@ elements.pageButtons.addEventListener("click", e => {
 const controleRecipe = async () => {
     // 1) URL - аас ID - г салгаж авна
      const id = window.location.hash.replace("#", "");
+     if(!state.like)state.like = new Like();
 
    if(id){
      // 2) Жорын моделыг үүсгэж өгнө
@@ -83,7 +85,7 @@ const controleRecipe = async () => {
     clearLoader();
 
     // 6) Жороо дэлгэцэнд үзүүлнэ
-     rendRec(state.recipe);
+     rendRec(state.recipe, state.like.isLiked(id));
    }
 }
 ["hashchange", "load"].forEach(e => window.addEventListener(e , controleRecipe));
@@ -120,17 +122,18 @@ const controlLike = () =>{
     // 2) Odoo haragdaj baigaa joriin modeliig olj awna;
     const currentRecipeId = state.recipe.id
     // 3) Ene Likelagdsan esehiig shalgana
-    if(state.like.isliked(currentRecipeId)){
+    if(state.like.isLiked(currentRecipeId)){
         //  likelsan bol deer n darahad like iig n boliulna
         state.like.deleteLike(currentRecipeId);
         likeView.toggleLikeBtn(false)
+        likeView.deleteLikes(currentRecipeId);
     }else{
        //  Likelaagui bol likelna
-       state.like.addLike(currentRecipeId, state.recipe.title, state.recipe.publisher, state.recipe.img_url);
+       const newLike = state.like.addLike(currentRecipeId, state.recipe.title, state.recipe.publisher, state.recipe.img_url);
+       likeView.renderLike(newLike);
        likeView.toggleLikeBtn(true)
-
     }
-
+    likeView.toglleLikeMenu(state.like.getNumberOfLikes());
 }
 
 elements.recipeDiv.addEventListener("click", e => {

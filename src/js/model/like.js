@@ -17,7 +17,7 @@ export default class Like{
 
         // Likelagdsan esehiig shalgadag function
     }
-    isliked(id) {
+    isLiked(id) {
         // if(this.like.findIndex(el => el.id ===id) === -1) return false;
         // else return true;
         return this.like.findIndex(el => el.id === id) !== -1 ;
