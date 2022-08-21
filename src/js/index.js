@@ -18,9 +18,6 @@ import * as likeView from './viev/likeView';
  */
 
 const state = {};
-likeView.toglleLikeMenu(0);
-
-
 /**
  * Хайлтын контроллер
  */
@@ -65,8 +62,6 @@ elements.pageButtons.addEventListener("click", e => {
 const controleRecipe = async () => {
     // 1) URL - аас ID - г салгаж авна
      const id = window.location.hash.replace("#", "");
-     if(!state.like)state.like = new Like();
-
    if(id){
      // 2) Жорын моделыг үүсгэж өгнө
      state.recipe = new Recipe(id);
@@ -90,7 +85,12 @@ const controleRecipe = async () => {
 }
 ["hashchange", "load"].forEach(e => window.addEventListener(e , controleRecipe));
 
-
+window.addEventListener("load", e => {
+    if(!state.like)state.like = new Like();
+    likeView.toglleLikeMenu(state.like.getNumberOfLikes());
+    // like aa tsesend haruulna
+    state.like.like.forEach(el => likeView.renderLike(el));
+})
 /**
  * Найрлаганы контроллер
  */
